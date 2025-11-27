@@ -18,7 +18,8 @@ function renderModule(name){
   if(name === 'cobranza') container.innerHTML = cobranzaTemplate();
 
   // Inicializa handlers del módulo
-  import('./modules.js').then(m => m.initModule(name));
+  import('./modules.js').then(m => m.initModules(name));
+
 }
 
 function leadTemplate(){
