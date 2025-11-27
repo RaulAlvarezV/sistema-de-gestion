@@ -1,10 +1,5 @@
   // Import the functions you need from the SDKs you need
 
-  import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
-
-
-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
@@ -42,3 +37,4 @@ import { getAnalytics } from 'firebase/analytics';
   const app = initializeApp(firebaseConfig);
 
   const analytics = getAnalytics(app);
+
