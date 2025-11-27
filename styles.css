@@ -1,0 +1,8 @@
+:root{
+--bg: #f8f9fa;
+}
+body{background:var(--bg);}
+.container{max-width:900px}
+.hidden{display:none}
+.form-section{margin-top:20px}
+.card-module{padding:16px;margin-top:16px}
