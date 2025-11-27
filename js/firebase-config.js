@@ -1,5 +1,4 @@
 // Firebase v12 - Config + Servicios
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
@@ -15,7 +14,7 @@ const firebaseConfig = {
   measurementId: "G-DS5R2RC2JM"
 };
 
-// Init app
+// Inicializar app
 const app = initializeApp(firebaseConfig);
 
 // Exportar servicios
