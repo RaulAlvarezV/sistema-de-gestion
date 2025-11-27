@@ -1,36 +1,44 @@
 // Manejo de login y registro
 import { auth } from './firebase-config.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
-
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
 export function initAuth(){
-const loginForm = document.getElementById('login-form');
-const loginBtn = document.getElementById('login-btn');
-const registerBtn = document.getElementById('register-btn');
+  const loginForm = document.getElementById('login-form');
+  const registerBtn = document.getElementById('register-btn');
 
+  loginForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-loginForm.addEventListener('submit', async (e)=>{
-e.preventDefault();
-const email = document.getElementById('email').value.trim();
-const password = document.getElementById('password').value;
-try{
-await signInWithEmailAndPassword(auth, email, password);
-}catch(err){
-alert('Error al ingresar: ' + err.message);
-}
-});
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+    }catch(err){
+      alert('Error al ingresar: ' + err.message);
+    }
+  });
 
+  registerBtn.addEventListener('click', async ()=>{
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-registerBtn.addEventListener('click', async ()=>{
-const email = document.getElementById('email').value.trim();
-const password = document.getElementById('password').value;
-if(!email || !password){ alert('Completa email y contraseña para registrar'); return; }
-try{
-await createUserWithEmailAndPassword(auth, email, password);
-alert('Usuario registrado.');
-}catch(err){ alert('Error registro: '+ err.message); }
-});
+    if(!email || !password){
+      alert('Completa email y contraseña para registrar');
+      return;
+    }
 
+    try{
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Usuario registrado.');
+    }catch(err){
+      alert('Error registro: '+ err.message);
+    }
+  });
 
-document.getElementById('logout-btn').addEventListener('click', ()=> auth.signOut());
+  document.getElementById('logout-btn')
+    .addEventListener('click', ()=> signOut(auth));
 }
