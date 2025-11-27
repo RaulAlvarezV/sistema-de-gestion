@@ -4,7 +4,7 @@ import {
   collection, addDoc, getDocs, doc, getDoc, updateDoc, setDoc, query, where
 } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
 
-export function initModule(name){
+export function initModules(name){
   if(name === 'lead') initLead();
   if(name === 'pedido') initPedido();
   if(name === 'stock') initStock();
