@@ -1,11 +1,571 @@
-:root{
---bg: #f8f9fa;
+/* ============================================================================
+   SISTEMA DE GESTIÓN - ESTILOS MODERNOS Y PROFESIONALES
+   ============================================================================ */
+
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  --dark-color: #212529;
+  --light-color: #f8f9fa;
+  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
-body{background:var(--bg);}
-.container{max-width:900px}
-.hidden{display:none}
-.form-section{margin-top:20px}
-.card-module{padding:16px;margin-top:16px}
+
+/* ============================================================================
+   BODY Y ESTRUCTURA GENERAL
+   ============================================================================ */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--light-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--dark-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================================
+   NAVBAR
+   ============================================================================ */
+
+.navbar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to right, var(--dark-color), #343a40) !important;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
+}
+
+#user-greeting {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.navbar-nav {
+  align-items: center;
+}
+
+.btn-outline-light:hover {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* ============================================================================
+   TÍTULOS Y HEADERS
+   ============================================================================ */
+
+h1.display-4 {
+  letter-spacing: -1px;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+p.lead {
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--secondary-color);
+}
+
+.text-center > hr {
+  background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+  height: 2px;
+  border: none;
+  margin: 2rem 0;
+}
+
+/* ============================================================================
+   LOGIN SECTION
+   ============================================================================ */
+
+.card {
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-body {
+  border-radius: 12px;
+}
+
+.card-title {
+  color: var(--dark-color);
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.form-control-lg {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+  color: var(--dark-color);
+  font-size: 0.95rem;
+}
+
+input::placeholder {
+  color: #adb5bd !important;
+  font-weight: 400;
+}
+
+/* ============================================================================
+   BOTONES
+   ============================================================================ */
+
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), #0b5ed7);
+  border: none;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 110, 253, 0.4);
+  background: linear-gradient(135deg, #0b5ed7, var(--primary-color));
+}
+
+.btn-outline-secondary {
+  border: 2px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+.btn-lg {
+  padding: 12px 24px;
+}
+
+/* ============================================================================
+   MÓDULOS - BOTONES DE NAVEGACIÓN
+   ============================================================================ */
+
+.btn-module {
+  padding: 20px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 120px;
+  font-size: 1.1rem;
+}
+
+.btn-module i {
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.btn-module:hover i {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.btn-module-clientes {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-module-clientes:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.btn-module-pedidos {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+}
+
+.btn-module-pedidos:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(245, 87, 108, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.btn-module-stock {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+}
+
+.btn-module-stock:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(79, 172, 254, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.btn-module-cobranza {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: white;
+}
+
+.btn-module-cobranza:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(67, 233, 123, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.btn-module-gestion {
+  background: linear-gradient(135deg, #fa709a, #fee140);
+  color: white;
+}
+
+.btn-module-gestion:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(250, 112, 154, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* ============================================================================
+   ALERTAS Y NOTIFICACIONES
+   ============================================================================ */
+
+.alert {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.alert-light {
+  background-color: #ffffff;
+  border: 2px solid #e9ecef;
+}
+
+.alert-info {
+  background-color: rgba(13, 202, 240, 0.1);
+  border: 2px solid rgba(13, 202, 240, 0.3);
+  color: var(--info-color);
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 2px solid rgba(255, 193, 7, 0.3);
+  color: #856404;
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 2px solid rgba(220, 53, 69, 0.3);
+  color: #721c24;
+}
+
+.alert-success {
+  background-color: rgba(25, 135, 84, 0.1);
+  border: 2px solid rgba(25, 135, 84, 0.3);
+  color: #155724;
+}
+
+/* ============================================================================
+   BADGES
+   ============================================================================ */
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.badge-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.badge-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.badge-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.badge-info {
+  background-color: var(--info-color);
+  color: #000;
+}
+
+.badge-warning {
+  background-color: var(--warning-color);
+  color: #000;
+}
+
+/* ============================================================================
+   TABLAS
+   ============================================================================ */
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 0;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+  box-shadow: inset 4px 0 0 0 var(--primary-color);
+}
+
+.table thead {
+  background: linear-gradient(to right, #212529, #343a40);
+  color: white;
+  font-weight: 600;
+}
+
+.table thead th {
+  border: none;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+/* ============================================================================
+   INPUTS Y SELECTS
+   ============================================================================ */
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  padding: 10px 14px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-control::placeholder {
+  color: #adb5bd;
+}
+
+/* ============================================================================
+   CONTAINER Y LAYOUT
+   ============================================================================ */
+
+.container-fluid {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.module-container {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.module-container h3 {
+  color: var(--dark-color);
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.module-container h5 {
+  color: var(--dark-color);
+  font-weight: 600;
+  margin-bottom: 16px;
+  margin-top: 20px;
+}
+
+.form-module {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+footer {
+  background: linear-gradient(to right, #212529, #343a40);
+  margin-top: auto;
+  color: #f8f9fa;
+}
+
+footer p {
+  color: #f8f9fa;
+}
+
+footer strong {
+  color: #00f2fe;
+  font-weight: 600;
+}
+
+footer small {
+  color: #adb5bd;
+}
+
+/* ============================================================================
+   UTILIDADES
+   ============================================================================ */
+
 .hidden {
-    display: none !important;
+  display: none !important;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+/* Breakpoint personalizado para 5 columnas */
+@media (max-width: 1400px) {
+  .col-lg-2-4 {
+    flex: 0 0 calc(20% - 0.6rem);
+  }
+}
+
+@media (max-width: 991px) {
+  .col-lg-2-4 {
+    flex: 0 0 calc(33.333% - 0.666rem);
+  }
+}
+
+@media (max-width: 768px) {
+  h1.display-4 {
+    font-size: 2rem;
+  }
+
+  .col-lg-2-4 {
+    flex: 0 0 calc(50% - 0.75rem);
+  }
+
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-lg-2-4 {
+    flex: 0 0 100%;
+  }
+
+  .btn-module {
+    padding: 16px 12px;
+    min-height: 100px;
+  }
+
+  .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .card-body {
+    padding: 20px !important;
+  }
+}
+
+/* ============================================================================
+   TRANSICIONES Y ANIMACIONES
+   ============================================================================ */
+
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card,
+.alert,
+.btn-module {
+  animation: slideInUp 0.5s ease;
 }

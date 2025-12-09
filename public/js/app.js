@@ -25,8 +25,23 @@ initAuth(async (user) => {
   window.currentUserEmail = user.email;
   window.currentUserRole = role;
 
-  document.getElementById("user-email").innerText = user.email;
-  document.getElementById("user-role").innerText = "Rol: " + role;
+  // Mostrar saludo y ocultar formulario de login
+  const loginSection = document.getElementById("login-section");
+  const routerSection = document.getElementById("router-section");
+  const userGreeting = document.getElementById("user-greeting");
+  const userEmailDisplay = document.getElementById("user-email-display");
+  const logoutNav = document.getElementById("logout-btn-nav");
+
+  if (loginSection) loginSection.classList.add("hidden");
+  if (routerSection) routerSection.classList.remove("hidden");
+
+  const displayName = data.nombre || user.displayName || user.email;
+  if (userGreeting) userGreeting.innerText = `Hola, ${displayName}`;
+  if (userEmailDisplay) userEmailDisplay.innerText = user.email;
+  if (logoutNav) logoutNav.classList.remove("d-none");
+
+  const roleBadge = document.getElementById("user-role");
+  if (roleBadge) roleBadge.innerText = role;
 
   mostrarBotonesSegunRol(role);
 });
@@ -35,9 +50,8 @@ initAuth(async (user) => {
 // Mostrar botones según permisos
 // =======================================
 function mostrarBotonesSegunRol(role) {
-
   const routerSection = document.getElementById("router-section");
-  routerSection.classList.remove("hidden");
+  if (routerSection) routerSection.classList.remove("hidden");
 
   const modClientes = document.getElementById("clientes-btn");
   const modPedidos = document.getElementById("pedido-btn");
@@ -63,3 +77,21 @@ function mostrarBotonesSegunRol(role) {
     btn.onclick = () => loadModule(btn.dataset.module, role);
   });
 }
+
+// Logout global
+document.getElementById("logout-btn")?.addEventListener("click", async () => {
+  // auth signOut viene desde auth.js que expone initAuth
+  try {
+    await auth.signOut();
+    // Restaurar UI
+    document.getElementById("login-section")?.classList.remove("hidden");
+    document.getElementById("router-section")?.classList.add("hidden");
+    document.getElementById("user-greeting").innerText = "";
+    document.getElementById("user-email-display").innerText = "";
+    document.getElementById("user-role").innerText = "";
+    document.getElementById("logout-btn-nav")?.classList.add("d-none");
+    Swal.fire({ icon: 'success', title: 'Sesión cerrada', timer: 900, showConfirmButton: false });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+  }
+});
