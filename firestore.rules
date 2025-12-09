@@ -3,17 +3,236 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    // ============================================================
+    // FUNCIONES HELPER PARA VALIDACIÓN DE ROLES
+    // ============================================================
+    
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      // Obtener rol del documento del usuario
+      let userDoc = get(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+      return userDoc.data.rol;
+    }
+
+    function isAdmin() {
+      // Admin si tiene el rol "admin"
+      return isLoggedIn() && getUserRole() == "admin";
+    }
+
+    function isEmpleado() {
+      // Empleado o admin pueden actuar como empleado
+      return isLoggedIn() && (
+        getUserRole() == "empleado" || 
+        getUserRole() == "admin"
+      );
+    }
+
+    function isVendedor() {
+      // Vendedor, empleado, o admin
+      return isLoggedIn() && (
+        getUserRole() == "vendedor" ||
+        getUserRole() == "empleado" ||
+        getUserRole() == "admin"
+      );
+    }
+
+    // ============================================================
+    // VALIDACIONES COMUNES
+    // ============================================================
+    
+    function hasRequiredFields(requiredFields) {
+      return request.resource.data.keys().hasAll(requiredFields);
+    }
+
+    function emailIsValid() {
+      return request.resource.data.email is string && 
+             request.resource.data.email.size() > 3 &&
+             request.resource.data.email.matches('.*@.*');
+    }
+
+    // ============================================================
+    // COLECCIÓN: USUARIOS
+    // ============================================================
+    // Almacena perfiles de usuarios autenticados con roles
+    
+    match /usuarios/{uid} {
+      
+      // Lectura: El usuario puede leer su propio perfil o admin puede leer cualquiera
+      allow read: if request.auth.uid == uid || isAdmin();
+
+      // Creación: Solo durante registro (cliente-side via auth.js)
+      // El usuario crea su propio perfil con rol "empleado" por defecto
+      allow create: if request.auth.uid == uid
+        && emailIsValid()
+        && request.resource.data.rol == "empleado"
+        && hasRequiredFields(["email", "rol", "createdAt"])
+        && request.resource.data.createdAt is number;
+
+      // Actualización: Solo el usuario puede actualizar su perfil (excepto rol)
+      // El rol solo puede cambiar vía Admin SDK o Cloud Function
+      allow update: if request.auth.uid == uid
+        && (
+          !("rol" in request.resource.data) ||
+          request.resource.data.rol == resource.data.rol
+        )
+        || isAdmin();
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // COLECCIÓN: CLIENTES
+    // ============================================================
+    // Base de datos de clientes del negocio
+    
+    match /clientes/{docId} {
+      
+      // Lectura: Todos los empleados y admins
+      allow read: if isEmpleado();
+
+      // Creación: Empleados y admins
+      allow create: if isEmpleado()
+        && hasRequiredFields(["nombre"])
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() >= 3;
+
+      // Actualización: Empleados y admins
+      allow update: if isEmpleado()
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() >= 3;
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // COLECCIÓN: PRODUCTOS
+    // ============================================================
+    // Catálogo de productos
+    
+    match /productos/{docId} {
+      
+      // Lectura: Todos los logueados
+      allow read: if isLoggedIn();
+
+      // Escritura (crear/actualizar/borrar): Solo admin
+      allow write: if isAdmin()
+        && hasRequiredFields(["nombre", "precio"])
+        && request.resource.data.nombre is string
+        && request.resource.data.nombre.size() >= 3
+        && request.resource.data.precio is number
+        && request.resource.data.precio > 0;
+    }
+
+    // ============================================================
+    // COLECCIÓN: STOCK
+    // ============================================================
+    // Inventario de productos
+    
+    match /stock/{docId} {
+      
+      // Lectura: Todos los logueados
+      allow read: if isLoggedIn();
+
+      // Creación: Solo admin
+      allow create: if isAdmin()
+        && hasRequiredFields(["productoId", "cantidad"])
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad >= 0;
+
+      // Actualización: Empleados (para descontar al crear pedidos) y admin
+      allow update: if isEmpleado()
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad >= 0;
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // COLECCIÓN: PEDIDOS
+    // ============================================================
+    // Registro de pedidos de clientes
+    
+    match /pedidos/{docId} {
+      
+      // Lectura: Todos los logueados
+      allow read: if isLoggedIn();
+
+      // Creación: Vendedores, empleados y admins
+      allow create: if isVendedor()
+        && hasRequiredFields(["clienteId", "estado", "items", "total"])
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.total is number
+        && request.resource.data.total > 0
+        && (request.resource.data.estado == "pendiente" 
+            || request.resource.data.estado == "confirmado");
+
+      // Actualización: Permitir cambios de estado por empleados/vendedores
+      allow update: if isVendedor()
+        && request.resource.data.estado in ["pendiente", "confirmado", "enviado", "entregado", "cancelado"];
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // COLECCIÓN: PEDIDOS_ITEMS (alternativa a array items)
+    // ============================================================
+    // Items dentro de cada pedido (como colección separada)
+    
+    match /pedidos_items/{docId} {
+      
+      // Lectura: Todos los logueados
+      allow read: if isLoggedIn();
+
+      // Creación: Empleados y admins
+      allow create: if isEmpleado()
+        && hasRequiredFields(["pedidoId", "productoId", "cantidad"])
+        && request.resource.data.cantidad is number
+        && request.resource.data.cantidad > 0;
+
+      // Actualización: NO permitido (los items creados no deben cambiar)
+      allow update: if false;
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // COLECCIÓN: PAGOS
+    // ============================================================
+    // Registro de pagos y cobranzas
+    
+    match /pagos/{docId} {
+      
+      // Lectura: Todos los logueados
+      allow read: if isLoggedIn();
+
+      // Creación: Empleados (cobranza) y admins
+      allow create: if isEmpleado()
+        && hasRequiredFields(["pedidoId", "clienteId", "monto", "metodoPago"])
+        && request.resource.data.monto is number
+        && request.resource.data.monto > 0
+        && request.resource.data.metodoPago in ["efectivo", "transferencia", "tarjeta", "cheque"];
+
+      // Actualización: Solo admin (para correcciones)
+      allow update: if isAdmin();
+
+      // Eliminación: Solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================================
+    // FALLBACK: DENEGAR TODO LO DEMÁS
+    // ============================================================
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 12, 27);
+      allow read, write: if false;
     }
   }
 }

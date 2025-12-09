@@ -1,204 +1,121 @@
-// --- FIREBASE ---
-import { db } from './firebase-config.js';
-import { collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+/* Minimal safe modules.js
+   - Exports the templates and init functions required by router.js
+   - Keeps implementations lightweight so the app can load without syntax errors
+   - Replace/extend functions later with full Firebase logic
+*/
 
-// --- EXPORT DE INIT ---
-export function initModules(name){
-  if(name === 'lead') initLead();
-  if(name === 'pedido') initPedido();
-  if(name === 'stock') initStock();
-  if(name === 'cobranza') initCobranza();
-}
+// Note: uses SweetAlert2 (Swal) included in index.html
 
-// --- TEMPLATES ---
-export function leadTemplate(){
+export function clientesTemplate(){
   return `
-    <div class="card card-module">
-      <h3>Lead - Crear Cliente</h3>
-      <form id="lead-form">
-        <div class="mb-3">
-          <label class="form-label">Nombre</label>
-          <input id="cliente-nombre" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input id="cliente-email" type="email" class="form-control" required>
-        </div>
-        <button class="btn btn-success">Crear Cliente</button>
+    <div>
+      <h3>Clientes</h3>
+      <form id="cliente-form" class="row g-2 mb-3">
+        <div class="col-md-4"><input id="cliente-nombre" class="form-control" placeholder="Nombre"></div>
+        <div class="col-md-4"><input id="cliente-razon" class="form-control" placeholder="Razón social"></div>
+        <div class="col-md-4"><button class="btn btn-primary">Guardar</button></div>
       </form>
-      <div id="lead-list" class="mt-3"></div>
+      <input id="buscar-cliente" class="form-control mb-2" placeholder="Buscar clientes...">
+      <div id="clientes-list"></div>
+      <div id="clientes-tabla"></div>
     </div>
   `;
 }
 
-export function pedidoTemplate(){ 
+export function pedidoTemplate(){
   return `
-    <div class="card card-module">
-      <h3>Pedido - Buscar Stock</h3>
-      <form id="buscar-stock-form">
-        <div class="mb-3">
-          <label class="form-label">ID del Producto</label>
-          <input id="producto-id" class="form-control" required>
-        </div>
-        <button class="btn btn-info">Buscar Stock</button>
-      </form>
-      <div id="stock-result" class="mt-3 hidden">
-        <p>Stock disponible: <span id="stock-cantidad"></span></p>
-        <button class="btn btn-success" id="btn-create-pedido">Crear Pedido</button>
-      </div>
-      <div id="create-pedido-section" class="hidden mt-3">
-        <h4>Crear Pedido</h4>
-        <form id="create-pedido-form">
-          <div class="mb-3"><label class="form-label">Cantidad</label><input id="pedido-cantidad" type="number" class="form-control" required></div>
-          <button class="btn btn-success">Crear Pedido</button>
-        </form>
-      </div>
+    <div>
+      <h3>Crear pedido</h3>
+      <select id="select-cliente" class="form-select mb-2"><option value="">-- Cargando clientes --</option></select>
+      <div class="mb-2"><input id="buscar-producto" class="form-control" placeholder="Buscar producto..."><button id="btn-buscar-producto" class="btn btn-sm btn-secondary mt-2">Buscar</button></div>
+      <div id="productos-result"></div>
+      <h5>Carrito</h5>
+      <div id="carrito-table"></div>
+      <div class="d-flex gap-2"><button id="btn-clear-carrito" class="btn btn-outline-secondary">Limpiar</button><button id="btn-guardar-pedido" class="btn btn-primary">Guardar pedido</button><button id="btn-generar-remito" class="btn btn-secondary">Generar remito</button></div>
     </div>
   `;
 }
 
-export function stockTemplate(){ 
+export function stockTemplate(){
   return `
-    <div class="card card-module">
-      <h3>Stock - Crear/Actualizar Stock</h3>
-      <form id="stock-form">
-        <div class="mb-3"><label class="form-label">ID del Producto</label><input id="stock-id" class="form-control" required></div>
-        <div class="mb-3"><label class="form-label">Cantidad</label><input id="stock-cantidad" type="number" class="form-control" required></div>
-        <button class="btn btn-warning">Crear/Actualizar Stock</button>
-      </form>
-      <div id="stock-list" class="mt-3"></div>
+    <div>
+      <h3>Stock</h3>
+      <div id="stock-list"></div>
     </div>
   `;
 }
 
-export function cobranzaTemplate(){ 
+export function cobranzaTemplate(){
   return `
-    <div class="card card-module">
-      <h3>Cobranza - Buscar Pedido</h3>
-      <form id="buscar-pedido-form">
-        <div class="mb-3"><label class="form-label">ID del Pedido</label><input id="pedido-id" class="form-control" required></div>
-        <button class="btn btn-info">Buscar Pedido</button>
-      </form>
-      <div id="pedido-result" class="mt-3 hidden">
-        <p>Pedido encontrado: <span id="pedido-detalle"></span></p>
-        <button class="btn btn-success" id="btn-registrar-pago">Registrar Pago</button>
-      </div>
-      <div id="registrar-pago-section" class="hidden mt-3">
-        <h4>Registrar Pago</h4>
-        <form id="registrar-pago-form">
-          <div class="mb-3"><label class="form-label">Monto</label><input id="pago-monto" type="number" class="form-control" required></div>
-          <button class="btn btn-success">Registrar Pago</button>
-        </form>
-      </div>
+    <div>
+      <h3>Cobranzas</h3>
+      <div id="cobranzas-list"></div>
+      <div id="cobranzas-pago-container"></div>
     </div>
   `;
 }
 
-// --- LÓGICA DE MÓDULOS ---
-async function initLead(){
-  const form = document.getElementById('lead-form');
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const nombre = document.getElementById('cliente-nombre').value.trim();
-    const email = document.getElementById('cliente-email').value.trim();
-    await addDoc(collection(db,'clientes'), { nombre, email, createdAt: Date.now() });
-    alert('Cliente creado');
-    form.reset();
-    renderClientes();
-  });
-  renderClientes();
+export function gestionTemplate(){
+  return `
+    <div>
+      <h3>Gestión</h3>
+      <div id="gestion-tabla"></div>
+    </div>
+  `;
 }
 
-async function renderClientes(){
-  const list = document.getElementById('lead-list');
-  list.innerHTML = '';
-  const q = await getDocs(collection(db,'clientes'));
-  q.forEach(docSnap => {
-    const d = docSnap.data();
-    const el = document.createElement('div');
-    el.textContent = `${d.nombre} — ${d.email}`;
-    list.appendChild(el);
-  });
+// Minimal init functions: perform harmless wiring and show toast if missing resources
+export async function initClientes(){
+  // attach submit handler to the small form created above
+  const form = document.getElementById('cliente-form');
+  if(form){
+    form.addEventListener('submit', async e=>{
+      e.preventDefault();
+      const nombre = document.getElementById('cliente-nombre')?.value || '';
+      if(!nombre) return Swal.fire({icon:'warning', title:'El nombre es obligatorio'});
+      // placeholder behaviour: show confirmation
+      Swal.fire({icon:'success', title:'Cliente guardado (placeholder)'});
+      form.reset();
+    });
+  }
 }
 
-// --- PEDIDO ---
-async function initPedido(){
-  const buscarForm = document.getElementById('buscar-stock-form');
-  buscarForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const id = document.getElementById('producto-id').value.trim();
-    const stockDoc = await getDoc(doc(db,'stock',id));
-    if(stockDoc.exists()){
-      document.getElementById('stock-cantidad').textContent = stockDoc.data().cantidad;
-      document.getElementById('stock-result').classList.remove('hidden');
-      window.currentStockId = id;
-    } else alert('Producto no encontrado');
+export async function initPedido(role){
+  // placeholder: wire search button to show a message
+  document.getElementById('btn-buscar-producto')?.addEventListener('click', ()=>{
+    const term = document.getElementById('buscar-producto')?.value || '';
+    const result = document.getElementById('productos-result');
+    result.innerHTML = `<div class="alert alert-info">Búsqueda simulada: ${term}</div>`;
   });
 
-  document.getElementById('btn-create-pedido').addEventListener('click', ()=>{
-    document.getElementById('create-pedido-section').classList.remove('hidden');
+  document.getElementById('btn-clear-carrito')?.addEventListener('click', ()=>{
+    localStorage.removeItem('app_carrito_temp');
+    renderCarritoPlaceholder();
+    Swal.fire({toast:true, position:'top-end', icon:'info', title:'Carrito limpiado', showConfirmButton:false, timer:1200});
   });
 
-  document.getElementById('create-pedido-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const cantidad = Number(document.getElementById('pedido-cantidad').value);
-    const id = 'ped'+Date.now();
-    await setDoc(doc(db,'pedidos',id), { id, cantidad, stockId: window.currentStockId||null, createdAt: Date.now() });
-    alert('Pedido creado');
-    document.getElementById('create-pedido-form').reset();
-  });
+  renderCarritoPlaceholder();
 }
 
-// --- STOCK ---
-async function initStock(){
-  const form = document.getElementById('stock-form');
-  form.addEventListener('submit', async e=>{
-    e.preventDefault();
-    const id = document.getElementById('stock-id').value.trim();
-    const cantidad = Number(document.getElementById('stock-cantidad').value);
-    await setDoc(doc(db,'stock',id), { cantidad, updatedAt: Date.now() });
-    alert('Stock actualizado');
-    form.reset();
-    renderStock();
-  });
-  renderStock();
+function renderCarritoPlaceholder(){
+  const cont = document.getElementById('carrito-table');
+  if(!cont) return;
+  const cart = JSON.parse(localStorage.getItem('app_carrito_temp')||'[]');
+  if(cart.length===0){ cont.innerHTML = '<div class="alert alert-secondary">Carrito vacío</div>'; return; }
+  let html = '<ul class="list-group mb-2">';
+  cart.forEach(i=> html += `<li class="list-group-item">${i.nombre} x ${i.cantidad}</li>`);
+  html += '</ul>';
+  cont.innerHTML = html;
 }
 
-async function renderStock(){
-  const list = document.getElementById('stock-list');
-  list.innerHTML = '';
-  const q = await getDocs(collection(db,'stock'));
-  q.forEach(snap => {
-    const d = snap.data();
-    const el = document.createElement('div');
-    el.textContent = `${snap.id} — ${d.cantidad}`;
-    list.appendChild(el);
-  });
+export async function initStock(role){
+  const list = document.getElementById('stock-list'); if(!list) return; list.innerHTML = '<div class="alert alert-secondary">Lista de stock (placeholder)</div>';
 }
 
-// --- COBRANZA ---
-async function initCobranza(){
-  const buscarForm = document.getElementById('buscar-pedido-form');
-  buscarForm.addEventListener('submit', async e=>{
-    e.preventDefault();
-    const id = document.getElementById('pedido-id').value.trim();
-    const pedidoDoc = await getDoc(doc(db,'pedidos',id));
-    if(pedidoDoc.exists()){
-      document.getElementById('pedido-detalle').textContent = `Cantidad: ${pedidoDoc.data().cantidad}`;
-      document.getElementById('pedido-result').classList.remove('hidden');
-      window.currentPedidoId = id;
-    } else alert('Pedido no encontrado');
-  });
+export async function initCobranza(role){
+  const list = document.getElementById('cobranzas-list'); if(!list) return; list.innerHTML = '<div class="alert alert-secondary">Lista de cobranzas (placeholder)</div>';
+}
 
-  document.getElementById('btn-registrar-pago').addEventListener('click', ()=>{
-    document.getElementById('registrar-pago-section').classList.remove('hidden');
-  });
-
-  document.getElementById('registrar-pago-form').addEventListener('submit', async e=>{
-    e.preventDefault();
-    const monto = Number(document.getElementById('pago-monto').value);
-    await setDoc(doc(db,'pagos','pago'+Date.now()), { monto, pedidoId: window.currentPedidoId||null, createdAt: Date.now() });
-    alert('Pago registrado');
-    document.getElementById('registrar-pago-form').reset();
-  });
+export async function initGestion(role){
+  const tabla = document.getElementById('gestion-tabla'); if(!tabla) return; tabla.innerHTML = '<div class="alert alert-secondary">Gestión (placeholder)</div>';
 }
